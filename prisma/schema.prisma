@@ -32,3 +32,78 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+model Shop {
+  id              String   @id @default(uuid())
+  shop            String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // --- Onboarding State ---
+  isOnboarded     Boolean  @default(false)
+
+  // --- Step 1: Packing ---
+  timezone        String   @default("Asia/Kolkata")
+  cutoffTime      String   @default("14:00") // 24-hr format "HH:mm"
+  procMin         Int      @default(1)
+  procMax         Int      @default(2)
+  oosEnabled      Boolean  @default(true)
+  oosDays         Int      @default(10)
+
+  // --- Step 2: Open Days ---
+  workingDays     Int[]    @default([1, 2, 3, 4, 5, 6]) // Mon=1 .. Sat=6
+  carrierSat      Boolean  @default(false)
+  carrierSun      Boolean  @default(false)
+
+  // --- Step 3: Shipping Origin ---
+  homeCountry     String   @default("IN")
+
+  // --- Step 5: Placement ---
+  widgetPosition  String   @default("below-atc") // "below-atc" | "above-atc" | "below-desc"
+
+  // --- Relations (Steps 2, 3, 4) ---
+  closures        Closure[]
+  zones           DeliveryZone[]
+  rules           ProductRule[]
+}
+
+model Closure {
+  id        String   @id @default(uuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  date      String   // "YYYY-MM-DD"
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([shopId])
+}
+
+model DeliveryZone {
+  id         String   @id @default(uuid())
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name       String
+  countries  String[] // Array of ISO-2 country codes e.g. ["US", "CA"]
+  transitMin Int      @default(2)
+  transitMax Int      @default(4)
+  isHome     Boolean  @default(false)
+  isFallback Boolean  @default(false)
+
+  @@index([shopId])
+}
+
+model ProductRule {
+  id            String   @id @default(uuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  priorityOrder Int      @default(0) // Enforces "first-match-wins" order
+  matchField    String   // "type" | "tag" | "title" | "vendor"
+  matchOperator String   // "is" | "contains"
+  matchValue    String
+  behaviour     String   // "estimate" | "merchant" | "hide"
+  procMin       Int      @default(0)
+  procMax       Int      @default(0)
+  isEnabled     Boolean  @default(true)
+
+  @@index([shopId])
+}
