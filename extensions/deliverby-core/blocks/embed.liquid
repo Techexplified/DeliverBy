@@ -1,0 +1,14 @@
+<script>
+  window.__deliverby = {
+    shop: {{ shop.permanent_domain | json }},
+    appUrl: "https://example.com",
+  };
+</script>
+
+{% schema %}
+{
+  "name": "DELIVERBY - Core",
+  "target": "section",
+  "javascript": "embed.js"
+}
+{% endschema %}
