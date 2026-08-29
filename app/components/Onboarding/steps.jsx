@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PublicHolidays } from "../../libs/onboarding/Holidays";
 
-const TIMEZONES = [
+export const TIMEZONES = [
   { value: "Asia/Kolkata", label: "(GMT+5:30) Kolkata" },
   { value: "Europe/London", label: "(GMT+1:00) London" },
   { value: "America/New_York", label: "(GMT-4:00) New York" },

@@ -344,7 +344,7 @@ export default function OverviewPage() {
                                         ? "Ordered after the cut-off, so this joins tomorrow's dispatch."
                                         : "Ordered before the cut-off, so this is packed today."}
                                 </p>
-                                <Link to="/app" className="trace-link">Change this</Link>
+                                <Link to="/app/processing-time" className="trace-link">Change this</Link>
                             </div>
                         </div>
                         <div className="trace-val">
@@ -359,7 +359,7 @@ export default function OverviewPage() {
                             <div className="trace-info">
                                 <h4>Dispatch time is added</h4>
                                 <p>Working days only. Weekends and closures are skipped.</p>
-                                <Link to="/app" className="trace-link">Change this</Link>
+                                <Link to="/app/processing-time" className="trace-link">Change this</Link>
                             </div>
                         </div>
                         <div className="trace-val">

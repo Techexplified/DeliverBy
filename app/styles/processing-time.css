@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ══════════════════════════════════════════════════════════════
+   PROCESSING TIME SETTINGS STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.proc-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  color: #303030;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.proc-page * {
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header */
+.proc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.proc-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.proc-subtitle {
+  font-size: 13px;
+  color: #616161;
+  margin: 4px 0 0;
+}
+
+/* Sections */
+.proc-section {
+  margin-bottom: 24px;
+}
+
+.proc-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 3px;
+  color: #1a1a1a;
+}
+
+.proc-section-subtitle {
+  font-size: 12.5px;
+  color: #616161;
+  margin: 0 0 12px;
+}
+
+/* Card */
+.proc-card {
+  background: #ffffff;
+  border: 1px solid #E3E3E3;
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgba(26, 26, 26, 0.07);
+  padding: 20px;
+}
+
+/* 2-Column Row for Cutoff & Timezone */
+.proc-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 600px) {
+  .proc-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.proc-field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.proc-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+
+.proc-help {
+  font-size: 12px;
+  color: #616161;
+  margin: 6px 0 0;
+  line-height: 16px;
+}
+
+/* Inputs & Selects with identical 36px height */
+.proc-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #CDCDCD;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #303030;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.proc-input:focus {
+  border-color: #005BD3;
+  box-shadow: 0 0 0 2px rgba(0, 91, 211, 0.2);
+}
+
+select.proc-input {
+  appearance: none;
+  padding-right: 28px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%234A4A4A' stroke-width='1.6'><path d='M1 1l4 4 4-4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.proc-input-num {
+  width: 68px;
+  height: 36px;
+  text-align: center;
+  border: 1px solid #CDCDCD;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #303030;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.proc-input-num:focus {
+  border-color: #005BD3;
+  box-shadow: 0 0 0 2px rgba(0, 91, 211, 0.2);
+}
+
+/* Divider */
+.proc-divider {
+  height: 1px;
+  background: #EBEBEB;
+  margin: 18px 0;
+}
+
+/* Switch */
+.proc-switch-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.proc-switch-info h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.proc-switch-info p {
+  font-size: 12px;
+  color: #616161;
+  margin: 3px 0 0;
+  line-height: 17px;
+  max-width: 480px;
+}
+
+.proc-switch {
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  background: #B5B5B5;
+  border: 0;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.14s;
+  flex: 0 0 auto;
+}
+
+.proc-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.14s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.proc-switch.active {
+  background: #303030;
+}
+
+.proc-switch.active::after {
+  transform: translateX(16px);
+}

@@ -1,13 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 /* ══════════════════════════════════════════════════════════════
-   DELIVERBY OVERVIEW / DASHBOARD STYLES
+   DELIVERBY OVERVIEW & SETTINGS STYLES
    ══════════════════════════════════════════════════════════════ */
 
-.overview-page {
+.overview-page,
+.settings-page {
   max-width: 1040px;
   margin: 0 auto;
   padding: 24px 20px 60px;
   color: var(--text, #303030);
-  font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, Helvetica, sans-serif;
+  font-family: var(--font, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.settings-page {
+  max-width: 680px;
+}
+
+.overview-page *,
+.settings-page * {
+  font-family: var(--font, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.settings-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.settings-subtitle {
+  font-size: 13px;
+  color: #616161;
+  margin: 4px 0 0;
+}
+
+.settings-section {
+  margin-bottom: 28px;
+}
+
+.settings-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: #1a1a1a;
+}
+
+.settings-section-subtitle {
+  font-size: 12.5px;
+  color: #616161;
+  margin: 0 0 12px;
+}
+
+.settings-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 600px) {
+  .settings-grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .ov-header {

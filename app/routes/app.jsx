@@ -17,6 +17,7 @@ export default function App() {
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
         <s-link href="/app/overview">Overview</s-link>
+        <s-link href="/app/processing-time">Processing time</s-link>
       </s-app-nav>
       <Outlet />
     </AppProvider>
