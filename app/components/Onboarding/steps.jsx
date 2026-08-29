@@ -9,7 +9,7 @@ const TIMEZONES = [
   { value: "Australia/Sydney", label: "(GMT+10:00) Sydney" },
 ];
 
-const COUNTRIES = [
+export const COUNTRIES = [
   { code: "IN", name: "India" },
   { code: "US", name: "United States" },
   { code: "GB", name: "United Kingdom" },

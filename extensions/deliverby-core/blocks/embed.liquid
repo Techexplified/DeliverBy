@@ -5,10 +5,22 @@
   };
 </script>
 
+{% comment %}
+try "templates": ["product"] later if embed to be only shown in product section.
+{% endcomment %}
+
 {% schema %}
 {
   "name": "DELIVERBY - Core",
   "target": "section",
-  "javascript": "embed.js"
+  "javascript": "embed.js",
+  "settings": [
+    {
+      "type":"checkbox",
+      "id":"enable",
+      "label" : "Enable Deliverby Core",
+      "default" : true
+    }
+  ]
 }
 {% endschema %}

@@ -9,8 +9,12 @@ import "../styles/onboarding.css";
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
   const shopDomain = session.shop;
+  const url = new URL(request.url);
 
   const shopData = await getOnboardingData(shopDomain);
+  // if (shopData?.isOnboarded) {
+  //   return redirect(`/app/overview?${url.searchParams.toString()}`);
+  // };
   return { initialData: shopData };
 };
 
@@ -226,7 +230,7 @@ export default function Onboarding() {
                 formData={formData}
                 isEmbedded={isEmbedded}
                 url={themeCustomizerUrl}
-                onFinish={() => navigate("/app")}
+                onFinish={() => navigate("/app/overview")}
               />
             )}
           </div>
