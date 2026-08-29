@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ══════════════════════════════════════════════════════════════
-   PROCESSING TIME SETTINGS STYLES
+   SHIPPING CALENDAR SETTINGS STYLES
    ══════════════════════════════════════════════════════════════ */
 
-.proc-page {
+.cal-page {
   max-width: 680px;
   margin: 0 auto;
   padding: 24px 20px 60px;
@@ -14,7 +14,7 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.proc-page * {
+.cal-page * {
   box-sizing: border-box;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -68,7 +68,7 @@
 }
 
 /* Header */
-.proc-header {
+.cal-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -76,39 +76,41 @@
   margin-bottom: 24px;
 }
 
-.proc-title {
+.cal-title {
   font-size: 20px;
   font-weight: 700;
   margin: 0;
   color: #1a1a1a;
 }
 
-.proc-subtitle {
+.cal-subtitle {
   font-size: 13px;
   color: #616161;
   margin: 4px 0 0;
+  line-height: 18px;
 }
 
 /* Sections */
-.proc-section {
+.cal-section {
   margin-bottom: 24px;
 }
 
-.proc-section-title {
+.cal-section-title {
   font-size: 14px;
   font-weight: 700;
   margin: 0 0 3px;
   color: #1a1a1a;
 }
 
-.proc-section-subtitle {
+.cal-section-subtitle {
   font-size: 12.5px;
   color: #616161;
   margin: 0 0 12px;
+  line-height: 18px;
 }
 
 /* Card */
-.proc-card {
+.cal-card {
   background: #ffffff;
   border: 1px solid #E3E3E3;
   border-radius: 12px;
@@ -116,44 +118,53 @@
   padding: 20px;
 }
 
-/* 2-Column Row for Cutoff & Timezone */
-.proc-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
-}
-
-@media (max-width: 600px) {
-  .proc-grid-2 {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-}
-
-.proc-field-group {
+/* Days of Week Buttons */
+.cal-days-grid {
   display: flex;
-  flex-direction: column;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.proc-label {
-  display: block;
-  font-size: 13px;
+.cal-day-btn {
+  width: 44px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #CDCDCD;
+  background: #ffffff;
+  color: #303030;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 6px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.12s ease;
 }
 
-.proc-help {
+.cal-day-btn:hover {
+  border-color: #999;
+}
+
+.cal-day-btn.selected {
+  background: #303030;
+  border-color: #303030;
+  color: #ffffff;
+}
+
+.cal-summary-text {
   font-size: 12px;
   color: #616161;
-  margin: 6px 0 0;
-  line-height: 16px;
+  margin-top: 10px;
 }
 
-/* Inputs & Selects with identical 36px height */
-.proc-input {
-  width: 100%;
+/* Closure Add Row */
+.cal-add-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cal-input {
   height: 36px;
   padding: 0 10px;
   border: 1px solid #CDCDCD;
@@ -165,12 +176,12 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.proc-input:focus {
+.cal-input:focus {
   border-color: #005BD3;
   box-shadow: 0 0 0 2px rgba(0, 91, 211, 0.2);
 }
 
-select.proc-input {
+select.cal-input {
   appearance: none;
   padding-right: 28px;
   cursor: pointer;
@@ -179,82 +190,68 @@ select.proc-input {
   background-position: right 10px center;
 }
 
-.proc-input-num {
-  width: 68px;
-  height: 36px;
-  text-align: center;
-  border: 1px solid #CDCDCD;
-  border-radius: 8px;
+/* Closures Table */
+.cal-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 13px;
-  color: #303030;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  margin-bottom: 14px;
 }
 
-.proc-input-num:focus {
-  border-color: #005BD3;
-  box-shadow: 0 0 0 2px rgba(0, 91, 211, 0.2);
+.cal-table th {
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #616161;
+  padding: 8px 0;
+  border-bottom: 1px solid #EBEBEB;
 }
 
-/* Divider */
-.proc-divider {
-  height: 1px;
-  background: #EBEBEB;
-  margin: 18px 0;
+.cal-table td {
+  padding: 10px 0;
+  border-bottom: 1px solid #F1F1F1;
+  vertical-align: middle;
 }
 
-/* Switch */
-.proc-switch-row {
+.cal-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.cal-remove-btn {
+  background: none;
+  border: 1px solid #F1F1F1;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #C5280C;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.cal-remove-btn:hover {
+  background: #FFF0F0;
+  border-color: #FFD2CC;
+}
+
+/* Bulk Import Footer */
+.cal-bulk-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #EBEBEB;
+  margin-top: 6px;
 }
 
-.proc-switch-info h4 {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-  color: #1a1a1a;
-}
-
-.proc-switch-info p {
-  font-size: 12px;
+.cal-bulk-text {
+  font-size: 12.5px;
   color: #616161;
-  margin: 3px 0 0;
-  line-height: 17px;
-  max-width: 480px;
 }
 
-.proc-switch {
-  width: 38px;
-  height: 22px;
-  border-radius: 11px;
-  background: #B5B5B5;
-  border: 0;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.14s;
-  flex: 0 0 auto;
-}
-
-.proc-switch::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform 0.14s;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.proc-switch.active {
-  background: #303030;
-}
-
-.proc-switch.active::after {
-  transform: translateX(16px);
+.cal-bulk-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

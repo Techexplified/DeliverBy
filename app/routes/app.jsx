@@ -18,6 +18,7 @@ export default function App() {
       <s-app-nav>
         <s-link href="/app/overview">Overview</s-link>
         <s-link href="/app/processing-time">Processing time</s-link>
+        <s-link href="/app/shipping-calendar">Shipping calendar</s-link>
       </s-app-nav>
       <Outlet />
     </AppProvider>
