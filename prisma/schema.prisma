@@ -61,6 +61,16 @@ model Shop {
   // --- Step 5: Placement ---
   widgetPosition  String   @default("below-atc") // "below-atc" | "above-atc" | "below-desc"
 
+  // safety buffers 
+  customsClearanceEnabled     Boolean  @default(false)
+  customsClearanceDays        Int      @default(2)
+  peakSeasonoEnabled          Boolean  @default(false)
+  peakSeasonStart             String?
+  peakSeasonEnd               String?
+  peakSeasonTransitMin        Int      @default(1)
+  peakSeasonTransitMax        Int      @default(3)
+
+
   // --- Relations (Steps 2, 3, 4) ---
   closures        Closure[]
   zones           DeliveryZone[]
