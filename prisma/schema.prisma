@@ -71,6 +71,21 @@ model Shop {
   peakSeasonTransitMax        Int      @default(3)
 
 
+  // --- Widget Design Settings ---
+  dateFormat              String   @default("range")       // "range" | "single" | "days"
+  dateStyle               String   @default("full")        // "full" | "medium" | "short" | "day"
+  mainLine                String   @default("Get it {date}")
+  supportingLine          String   @default("Dispatched from Kolkata")
+  fallbackText            String   @default("Enter your postcode for a delivery date")
+  showCutoffCountdown     Boolean  @default(true)
+  showBreakdown           Boolean  @default(true)
+  showDeliveryIcon        Boolean  @default(true)
+  hideWhenNoRule          Boolean  @default(false)
+  widgetContainer         String   @default("none")        // "none" | "bordered" | "tinted"
+  widgetAlignment         String   @default("left")        // "left" | "center"
+  widgetIcon              String   @default("van")         // "van" | "box" | "calendar"
+  widgetAccentColor       String   @default("#1A5D38")     // Hex color
+
   // --- Relations (Steps 2, 3, 4) ---
   closures        Closure[]
   zones           DeliveryZone[]

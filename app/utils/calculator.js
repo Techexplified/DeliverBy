@@ -60,7 +60,7 @@ export function findMatchingRule(product, rules = []) {
     if (!ruleVal) return false;
 
     let target = "";
-    if (rule.matchField === "type") target = product.type || "";
+    if (rule.matchField === "type") target = product.type || product.productType || "";
     else if (rule.matchField === "vendor") target = product.vendor || "";
     else if (rule.matchField === "title") target = product.title || "";
     else if (rule.matchField === "tag") {
