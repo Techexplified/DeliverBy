@@ -371,7 +371,7 @@ export default function OverviewPage() {
                             <div className="trace-info">
                                 <h4>Transit time is added</h4>
                                 <p>Counted on the carrier's calendar for {matchedZone.name || "domestic"}.</p>
-                                <Link to="/app" className="trace-link">Change this</Link>
+                                <Link to="/app/zones" className="trace-link">Change this</Link>
                             </div>
                         </div>
                         <div className="trace-val">
@@ -386,7 +386,7 @@ export default function OverviewPage() {
                             <div className="trace-info">
                                 <h4>The shopper sees this</h4>
                                 <p>Rendered on the product page.</p>
-                                <Link to="/app" className="trace-link">Change this</Link>
+                                <Link to="/app/widget-customization" className="trace-link">Change this</Link>
                             </div>
                         </div>
                         <div className="trace-val trace-val-final">
