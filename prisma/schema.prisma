@@ -86,6 +86,10 @@ model Shop {
   widgetIcon              String   @default("van")         // "van" | "box" | "calendar"
   widgetAccentColor       String   @default("#1A5D38")     // Hex color
 
+  // --- Settings ---
+  detectionMethod         String   @default("ip")          // "ip"
+  locationFallback        String   @default("ask")         // "ask" | "home" | "fallback"
+
   // --- Relations (Steps 2, 3, 4) ---
   closures        Closure[]
   zones           DeliveryZone[]

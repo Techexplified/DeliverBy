@@ -22,6 +22,7 @@ export default function App() {
         <s-link href="/app/zones">Delivery zones</s-link>
         <s-link href="/app/rules">Product rules</s-link>
         <s-link href="/app/widget-customization">Widget design</s-link>
+        <s-link href="/app/settings">Settings</s-link>
       </s-app-nav>
       <Outlet />
     </AppProvider>
