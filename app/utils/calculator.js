@@ -81,6 +81,44 @@ export function findMatchingRule(product, rules = []) {
   });
 }
 
+export function checkAndAddSafetyBuffers({
+  currentDate = new Date(),
+  transitMin = 2,
+  transitMax = 4,
+  shopperZone = {},
+  shopSettings = {},
+}) {
+  let finalTransitMin = Number(transitMin) || 0;
+  let finalTransitMax = Number(transitMax) || 0;
+
+  // 1. Customs Clearance Buffer (applied to slowest estimate for non-home zones)
+  if (shopSettings.customsClearanceEnabled && !shopperZone?.isHome) {
+    finalTransitMax += Number(shopSettings.customsClearanceDays || 0);
+  }
+
+  // 2. Peak Season Buffer (widens whole range during peak window)
+  if (
+    shopSettings.peakSeasonoEnabled &&
+    shopSettings.peakSeasonStart &&
+    shopSettings.peakSeasonEnd
+  ) {
+    const dateStr = format(currentDate, "yyyy-MM-dd");
+    const isPeak =
+      dateStr >= shopSettings.peakSeasonStart &&
+      dateStr <= shopSettings.peakSeasonEnd;
+
+    if (isPeak) {
+      finalTransitMin += Number(shopSettings.peakSeasonTransitMin || 0);
+      finalTransitMax += Number(shopSettings.peakSeasonTransitMax || 0);
+    }
+  }
+
+  return {
+    transitMin: finalTransitMin,
+    transitMax: finalTransitMax,
+  };
+}
+
 export function calculate({
   cutoffTime = "14:00",
   rules = [],
@@ -92,7 +130,7 @@ export function calculate({
   carrierSun = false,
   procMin = 1,
   procMax = 2,
-  shopperZone = { transitMin: 2, transitMax: 4 },
+  shopperZone = { transitMin: 2, transitMax: 4, isHome: true },
   currentDate = new Date(),
 }) {
   // 1. If no working days are configured, calculation cannot proceed
@@ -142,9 +180,14 @@ export function calculate({
   const shipMin = addWorkingDays(startDay, procMin, workingDays, closures);
   const shipMax = addWorkingDays(startDay, procMax, workingDays, closures);
 
-  // 5. Calculate delivery (reaching customer)
-  const transitMin = shopperZone?.transitMin ?? 2;
-  const transitMax = shopperZone?.transitMax ?? 4;
+  // 5. Calculate delivery with safety buffers applied
+  const { transitMin, transitMax } = checkAndAddSafetyBuffers({
+    currentDate,
+    transitMin: shopperZone?.transitMin ?? 2,
+    transitMax: shopperZone?.transitMax ?? 4,
+    shopperZone,
+    shopSettings,
+  });
 
   const arriveMin = addCarrierDays(shipMin, transitMin, carrierSat, carrierSun, closures);
   const arriveMax = addCarrierDays(shipMax, transitMax, carrierSat, carrierSun, closures);

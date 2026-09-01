@@ -144,10 +144,7 @@ export default function OverviewPage() {
         procMin: settingsData.procMin ?? 1,
         procMax: settingsData.procMax ?? 2,
         rules: settingsData.rules || [],
-        shopSettings: {
-            oosEnabled: settingsData.oosEnabled ?? true,
-            oosDays: settingsData.oosDays ?? 10,
-        },
+        shopSettings: settingsData,
         product: productForCalc,
         shopperZone: matchedZone,
         currentDate: now,

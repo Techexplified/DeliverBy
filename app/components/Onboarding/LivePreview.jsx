@@ -116,10 +116,7 @@ export function LivePreview({ formData = {}, currentStep = 1 }) {
     procMin: formData.procMin ?? 1,
     procMax: formData.procMax ?? 2,
     rules: formData.rules || [],
-    shopSettings: {
-      oosEnabled: formData.oosEnabled ?? true,
-      oosDays: formData.oosDays ?? 10,
-    },
+    shopSettings: formData,
     product,
     shopperZone: matchedZone,
     currentDate: now,

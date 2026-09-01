@@ -117,14 +117,6 @@ export function getZoneArrivalText(zone, formData) {
   if (!zone) return "—";
   const now = new Date();
 
-  let transitMin = Number(zone.transitMin) || 1;
-  let transitMax = Number(zone.transitMax) || 2;
-
-  let customsBuffer = 0;
-  if (formData.customsClearanceEnabled && !zone.isHome && !zone.isFallback) {
-    customsBuffer = Number(formData.customsClearanceDays) || 0;
-  }
-
   const calcResult = calculate({
     cutoffTime: formData.cutoffTime || "14:00",
     workingDays: formData.workingDays || [1, 2, 3, 4, 5, 6],
@@ -134,15 +126,8 @@ export function getZoneArrivalText(zone, formData) {
     procMin: formData.procMin ?? 1,
     procMax: formData.procMax ?? 2,
     rules: [],
-    shopSettings: {
-      oosEnabled: false,
-      oosDays: 0,
-    },
-    shopperZone: {
-      ...zone,
-      transitMin: transitMin,
-      transitMax: transitMax + customsBuffer,
-    },
+    shopSettings: formData,
+    shopperZone: zone,
     currentDate: now,
   });
 
