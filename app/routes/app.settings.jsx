@@ -28,6 +28,59 @@ export async function loader({ request }) {
   return data({ shopData });
 }
 
+function validateConfiguration(parsed) {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return "Configuration must be a valid JSON object";
+  }
+
+  if (parsed.cutoffTime && !/^\d{1,2}:\d{2}$/.test(parsed.cutoffTime)) {
+    return "Invalid cutoffTime format. Expected 'HH:mm' (e.g. 14:00)";
+  }
+
+  if (
+    parsed.workingDays &&
+    (!Array.isArray(parsed.workingDays) ||
+      parsed.workingDays.some((d) => typeof d !== "number" || d < 0 || d > 7))
+  ) {
+    return "Invalid workingDays. Expected array of day numbers (e.g. [1, 2, 3, 4, 5])";
+  }
+
+  if (parsed.zones) {
+    if (!Array.isArray(parsed.zones)) {
+      return "Invalid zones format. Expected an array of delivery zones.";
+    }
+    for (const z of parsed.zones) {
+      if (!z.name || typeof z.name !== "string") {
+        return "Each delivery zone must have a valid name";
+      }
+    }
+  }
+
+  if (parsed.rules) {
+    if (!Array.isArray(parsed.rules)) {
+      return "Invalid rules format. Expected an array of product rules.";
+    }
+    for (const r of parsed.rules) {
+      if (!r.matchField || !r.matchValue || !r.behaviour) {
+        return "Each product rule must contain matchField, matchValue, and behaviour";
+      }
+    }
+  }
+
+  if (parsed.closures) {
+    if (!Array.isArray(parsed.closures)) {
+      return "Invalid closures format. Expected an array of closures.";
+    }
+    for (const c of parsed.closures) {
+      if (!c.date || !/^\d{4}-\d{2}-\d{2}$/.test(c.date)) {
+        return "Each closure must have a valid date in YYYY-MM-DD format";
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function action({ request }) {
   const { session } = await authenticate.admin(request);
   const shopName = session.shop;
@@ -125,6 +178,12 @@ export async function action({ request }) {
     try {
       const parsed = typeof config === "string" ? JSON.parse(config) : config;
 
+      // Validate parsed content
+      const validationError = validateConfiguration(parsed);
+      if (validationError) {
+        return data({ error: validationError });
+      }
+
       await db.$transaction(async (tx) => {
         // 1. Update Shop scalar fields
         await tx.shop.update({
@@ -218,7 +277,7 @@ export async function action({ request }) {
 
       return data({ success: true, message: "Configuration imported successfully" });
     } catch (e) {
-      return data({ error: `Failed to import configuration: ${e.message}` });
+      return data({ error: `Invalid JSON: ${e.message}` });
     }
   }
 
@@ -307,7 +366,22 @@ export default function Settings() {
   };
 
   const handleImportSubmit = () => {
-    if (!importJsonText.trim()) return;
+    if (!importJsonText.trim()) {
+      shopify.toast.show("Please paste a JSON configuration first", { isError: true });
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(importJsonText.trim());
+      if (typeof parsed !== "object" || Array.isArray(parsed) || !parsed) {
+        shopify.toast.show("Invalid format: Must be a JSON object", { isError: true });
+        return;
+      }
+    } catch (e) {
+      shopify.toast.show(`Invalid JSON syntax: ${e.message}`, { isError: true });
+      return;
+    }
+
     fetcher.submit(
       {
         intent: "importConfig",
