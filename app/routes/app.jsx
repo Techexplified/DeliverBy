@@ -20,6 +20,7 @@ export default function App() {
         <s-link href="/app/processing-time">Processing time</s-link>
         <s-link href="/app/shipping-calendar">Shipping calendar</s-link>
         <s-link href="/app/zones">Delivery zones</s-link>
+        <s-link href="/app/rules">Product rules</s-link>
       </s-app-nav>
       <Outlet />
     </AppProvider>
