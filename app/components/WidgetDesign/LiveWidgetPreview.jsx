@@ -250,13 +250,6 @@ export default function LiveWidgetPreview({
                   </div>
                 )}
 
-                {/* Fallback Note from Settings */}
-                {fallbackNote && (
-                  <div style={{ marginTop: "6px", fontSize: "11px", color: "#616161", fontStyle: "italic" }}>
-                    ℹ️ {fallbackNote}
-                  </div>
-                )}
-
                 {/* Reset test postcode link if in geofail mode */}
                 {simMode === "geofail" && postalDetectedCountry && (
                   <div style={{ marginTop: "8px", textAlign: "right" }}>
@@ -330,6 +323,12 @@ export default function LiveWidgetPreview({
             Geolocation failed
           </button>
         </div>
+
+        {simMode === "geofail" && fallbackNote && (
+          <div style={{ fontSize: "11.5px", color: "#616161", marginTop: "6px" }}>
+            {fallbackNote} (<a href="/app/settings" style={{ color: "#005BD3", textDecoration: "underline" }}>Settings</a>)
+          </div>
+        )}
       </div>
 
       {/* Preview Product Dropdown */}
