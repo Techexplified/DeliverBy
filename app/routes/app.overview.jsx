@@ -7,6 +7,7 @@ import { calculate, isWorkDay } from "../utils/calculator";
 import { COUNTRIES } from "../components/Onboarding/steps";
 import "../styles/onboarding.css";
 import "../styles/overview.css";
+import { formatMoney } from "../utils/currency.js";
 
 export async function loader({ request }) {
     const { admin, session } = await authenticate.admin(request);
@@ -23,6 +24,9 @@ export async function loader({ request }) {
         }),
         admin.graphql(`
       query getProducts {
+        shop {
+          currencyCode
+        }
         products(first: 10) {
           nodes {
             id
@@ -45,12 +49,14 @@ export async function loader({ request }) {
     }
 
     const productJson = await productResponse.json();
+    const currencyCode = productJson?.data?.shop?.currencyCode || "USD";
     const productData = productJson?.data?.products?.nodes || [];
 
     return data({
         settingsData,
         productData,
         storeHandle: shopName.split(".")[0],
+        currencyCode,
     });
 }
 
@@ -73,7 +79,7 @@ function formatShortRange(dMin, dMax) {
 }
 
 export default function OverviewPage() {
-    const { settingsData, productData, storeHandle } = useLoaderData();
+    const { settingsData, productData, storeHandle, currencyCode } = useLoaderData();
     const embedfetcher = useFetcher();
     const [checkedEmbed, setCheckedEmbed] = useState(false);
     const themeCustomizerUrl = `https://admin.shopify.com/store/${storeHandle}/themes/current/editor?template=product`;
@@ -112,9 +118,8 @@ export default function OverviewPage() {
     const [selectedCountry, setSelectedCountry] = useState(settingsData.homeCountry || "IN");
 
     const selectedProductRaw = productData.find((p) => p.id === selectedProductId) || initialProduct;
-    const productPrice = selectedProductRaw.variants?.nodes?.[0]?.price
-        ? `₹${parseFloat(selectedProductRaw.variants.nodes[0].price).toLocaleString()}`
-        : "₹2,400.00";
+    const rawPrice = selectedProductRaw.variants?.nodes?.[0]?.price ?? "2400.00";
+    const productPrice = formatMoney(rawPrice, currencyCode);
 
     const productForCalc = {
         id: selectedProductRaw.id,

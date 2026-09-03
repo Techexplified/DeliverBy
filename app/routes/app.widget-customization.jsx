@@ -31,6 +31,9 @@ export async function loader({ request }) {
     }),
     admin.graphql(`
       query getProducts {
+        shop {
+          currencyCode
+        }
         products(first: 50) {
           nodes {
             id
@@ -52,9 +55,10 @@ export async function loader({ request }) {
   ]);
 
   const productJson = await productResponse.json();
+  const currencyCode = productJson?.data?.shop?.currencyCode || "USD";
   const productData = productJson?.data?.products?.nodes || [];
 
-  return data({ shopData, productData });
+  return data({ shopData, productData, currencyCode });
 }
 
 export async function action({ request }) {
@@ -87,8 +91,8 @@ export async function action({ request }) {
   return data({ error: "Invalid payload" });
 }
 
-export default function Customization() {
-  const { shopData, productData } = useLoaderData();
+export default function WidgetCustomizationPage() {
+  const { shopData, productData, currencyCode } = useLoaderData();
   const fetcher = useFetcher();
   const shopify = useAppBridge();
 
@@ -107,21 +111,27 @@ export default function Customization() {
     widgetAccentColor: shopData?.widgetAccentColor || "#1A5D38",
   });
 
-  const isSaving = fetcher.state === "submitting" || fetcher.state === "loading";
+  const isSaving = fetcher.state === "submitting";
 
   useEffect(() => {
-    if (fetcher.data?.success) {
-      shopify.toast.show("Saved");
+    if (fetcher.state === "idle" && fetcher.data) {
+      if (fetcher.data.success) {
+        shopify.toast.show(fetcher.data.message || "Widget design saved");
+      } else if (fetcher.data.error) {
+        shopify.toast.show(fetcher.data.error, { isError: true });
+      }
     }
-  }, [fetcher.data, shopify]);
+  }, [fetcher.state, fetcher.data, shopify]);
 
   const updateField = (field, value) => {
-    setWidgetData((prev) => ({ ...prev, [field]: value }));
+    setWidgetData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleSave = () => {
-    const payload = { intent: "save", widgetData };
-    fetcher.submit(payload, {
+    fetcher.submit(widgetData, {
       method: "POST",
       encType: "application/json",
     });
@@ -189,6 +199,7 @@ export default function Customization() {
             widgetData={widgetData}
             shopData={shopData}
             products={productData}
+            currencyCode={currencyCode}
           />
         </div>
       </div>

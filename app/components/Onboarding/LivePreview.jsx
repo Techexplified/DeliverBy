@@ -1,6 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { calculate } from "../../utils/calculator";
+import { formatMoney } from "../../utils/currency";
 
 function formatArrivalText(arriveMin, arriveMax) {
   const sameMonth = arriveMin.getMonth() === arriveMax.getMonth();
@@ -28,12 +29,12 @@ function formatShortRange(dMin, dMax) {
   return `${format(dMin, "d MMM")} – ${format(dMax, "d MMM")}`;
 }
 
-export function LivePreview({ formData = {}, currentStep = 1 }) {
+export function LivePreview({ formData = {}, currentStep = 1, currencyCode = "USD" }) {
   // 1. Pick sample product based on active step
   let product = {
     id: "tee",
     title: "Heavy Cotton Crew Tee",
-    price: "₹2,400.00",
+    price: formatMoney(45, currencyCode),
     type: "Apparel",
     vendor: "Northfold Supply",
     stock: 42,
@@ -55,7 +56,7 @@ export function LivePreview({ formData = {}, currentStep = 1 }) {
       product = {
         id: "table",
         title: "Oak Dining Table, 6-seat",
-        price: "₹96,000.00",
+        price: formatMoney(850, currencyCode),
         type: "Made to order",
         vendor: "Northfold Works",
         stock: 0,
@@ -67,7 +68,7 @@ export function LivePreview({ formData = {}, currentStep = 1 }) {
       product = {
         id: "drop",
         title: "Winter Drop Hoodie",
-        price: "₹5,800.00",
+        price: formatMoney(75, currencyCode),
         type: "Apparel",
         vendor: "Northfold Supply",
         stock: 0,
@@ -78,7 +79,7 @@ export function LivePreview({ formData = {}, currentStep = 1 }) {
       product = {
         id: "card",
         title: "Digital Gift Card",
-        price: "₹2,000.00",
+        price: formatMoney(25, currencyCode),
         type: "Digital",
         vendor: "Northfold Supply",
         stock: 999,

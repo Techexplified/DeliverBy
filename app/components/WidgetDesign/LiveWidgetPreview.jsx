@@ -4,11 +4,13 @@ import { calculate } from "../../utils/calculator";
 import { formatDeliveryLine, formatDateValue } from "../../utils/formatter";
 import { resolveZoneByCountry, detectCountryFromPostalCode } from "../../utils/geo";
 import { COUNTRIES } from "../../routes/app.zones";
+import { formatMoney } from "../../utils/currency";
 
 export default function LiveWidgetPreview({
   widgetData,
   shopData,
   products,
+  currencyCode = "USD",
 }) {
   const [selectedProductId, setSelectedProductId] = useState(products?.[0]?.id || "");
   const [selectedCountryCode, setSelectedCountryCode] = useState(shopData?.homeCountry || "IN");
@@ -20,17 +22,15 @@ export default function LiveWidgetPreview({
     title: "Heavy Cotton Crew Tee",
     productType: "Apparel",
     tags: [],
-    variants: { nodes: [{ price: "2,400.00" }] },
+    variants: { nodes: [{ price: "2400.00" }] },
   };
 
   const rawPrice =
     selectedProduct?.variants?.nodes?.[0]?.price ??
     selectedProduct?.variants?.[0]?.price ??
-    "2,400.00";
+    "2400.00";
 
-  const productPrice = String(rawPrice).startsWith("₹") || String(rawPrice).startsWith("$")
-    ? rawPrice
-    : `₹${rawPrice}`;
+  const productPrice = formatMoney(rawPrice, currencyCode);
 
   // Resolve active zone based on selected country or detected postal country
   const effectiveCountry = simMode === "geofail" && postalDetectedCountry ? postalDetectedCountry : selectedCountryCode;

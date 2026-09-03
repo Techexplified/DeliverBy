@@ -7,15 +7,16 @@ import { LivePreview } from "../components/Onboarding/LivePreview";
 import "../styles/onboarding.css";
 
 export const loader = async ({ request }) => {
-  const { session } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
   const shopDomain = session.shop;
-  const url = new URL(request.url);
+  const [shopData, shopDetailsRes] = await Promise.all([
+    getOnboardingData(shopDomain),
+    admin.graphql(`query { shop { currencyCode } }`),
+  ]);
+  const shopJson = await shopDetailsRes.json();
+  const currencyCode = shopJson?.data?.shop?.currencyCode || "USD";
 
-  const shopData = await getOnboardingData(shopDomain);
-  // if (shopData?.isOnboarded) {
-  //   return redirect(`/app/overview?${url.searchParams.toString()}`);
-  // };
-  return { initialData: shopData };
+  return { initialData: shopData, currencyCode };
 };
 
 export const action = async ({ request }) => {
@@ -63,7 +64,7 @@ function CustomStepper({ currentStep, onStepClick, maxReached }) {
 }
 
 export default function Onboarding() {
-  const { initialData } = useLoaderData();
+  const { initialData, currencyCode } = useLoaderData();
   const fetcher = useFetcher();
   const navigate = useNavigate();
 
@@ -237,7 +238,7 @@ export default function Onboarding() {
 
           {/* Right Column: Sticky Live Preview */}
           <aside>
-            <LivePreview formData={formData} currentStep={currentStep} />
+            <LivePreview formData={formData} currentStep={currentStep} currencyCode={currencyCode} />
           </aside>
         </div>
       </div>

@@ -53,6 +53,9 @@ export async function loader({ request }) {
     }),
     admin.graphql(`
       query getProducts {
+        shop {
+          currencyCode
+        }
         products(first: 50) {
           nodes {
             id
@@ -74,9 +77,10 @@ export async function loader({ request }) {
   ]);
 
   const productJson = await productResponse.json();
+  const currencyCode = productJson?.data?.shop?.currencyCode || "USD";
   const productData = productJson?.data?.products?.nodes || [];
 
-  return data({ shopData, productData });
+  return data({ shopData, productData, currencyCode });
 }
 
 export async function action({ request }) {
@@ -159,7 +163,7 @@ export function doesProductMatchRule(product, rule) {
 }
 
 export default function RulesPage() {
-  const { shopData, productData } = useLoaderData();
+  const { shopData, productData, currencyCode } = useLoaderData();
   const fetcher = useFetcher();
   const shopify = useAppBridge();
 
@@ -291,6 +295,7 @@ export default function RulesPage() {
         storeProcMax={shopData?.procMax}
         oosEnabled={shopData?.oosEnabled}
         oosDays={shopData?.oosDays}
+        currencyCode={currencyCode}
       />
 
       {/* Modal Dialog */}
