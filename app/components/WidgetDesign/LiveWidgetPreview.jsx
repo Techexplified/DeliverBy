@@ -32,8 +32,32 @@ export default function LiveWidgetPreview({
 
   const productPrice = formatMoney(rawPrice, currencyCode);
 
-  // Resolve active zone based on selected country or detected postal country
-  const effectiveCountry = simMode === "geofail" && postalDetectedCountry ? postalDetectedCountry : selectedCountryCode;
+  // Fallback Setting from Settings page: "ask" | "home" | "fallback"
+  const fallbackSetting = shopData?.locationFallback || "ask";
+
+  // Resolve active country & zone based on simulation mode and Settings
+  let effectiveCountry = selectedCountryCode;
+  let isPromptingPincode = false;
+  let fallbackNote = null;
+
+  if (simMode === "geofail") {
+    if (fallbackSetting === "ask") {
+      if (postalDetectedCountry) {
+        effectiveCountry = postalDetectedCountry;
+      } else {
+        isPromptingPincode = true;
+      }
+    } else if (fallbackSetting === "home") {
+      const homeZone = (shopData?.zones || []).find((z) => z.isHome);
+      effectiveCountry = homeZone?.countries?.[0] || shopData?.homeCountry || "IN";
+      fallbackNote = `Falling back to ${homeZone?.name || "Home zone"} (from Settings)`;
+    } else if (fallbackSetting === "fallback") {
+      effectiveCountry = "FALLBACK";
+      const fallbackZone = (shopData?.zones || []).find((z) => z.isFallback);
+      fallbackNote = `Falling back to ${fallbackZone?.name || "Rest of world zone"} (from Settings)`;
+    }
+  }
+
   const matchedZone = resolveZoneByCountry(effectiveCountry, shopData?.zones || []);
 
   // Run live calculation
@@ -190,7 +214,7 @@ export default function LiveWidgetPreview({
           <div
             className={`deliverby-widget-box container-${widgetData.widgetContainer || "none"} align-${widgetData.widgetAlignment || "left"}`}
           >
-            {simMode === "normal" || postalDetectedCountry ? (
+            {!isPromptingPincode ? (
               <>
                 <div className="deliverby-main-row">
                   {widgetData.showDeliveryIcon && renderIcon()}
@@ -223,6 +247,13 @@ export default function LiveWidgetPreview({
                       <span>In transit</span>
                       <span className="deliverby-breakdown-val">{transitText}</span>
                     </div>
+                  </div>
+                )}
+
+                {/* Fallback Note from Settings */}
+                {fallbackNote && (
+                  <div style={{ marginTop: "6px", fontSize: "11px", color: "#616161", fontStyle: "italic" }}>
+                    ℹ️ {fallbackNote}
                   </div>
                 )}
 
