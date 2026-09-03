@@ -1,25 +1,31 @@
-<script>
-  window.__deliverby = {
-    shop: {{ shop.permanent_domain | json }},
-    appUrl: "https://example.com",
-  };
-</script>
-
-{% comment %}
-try "templates": ["product"] later if embed to be only shown in product section.
-{% endcomment %}
+{% if block.settings.enable %}
+  <div class="deliverby-widget-root"
+       data-shop="{{ shop.permanent_domain }}"
+       data-country="{{ localization.country.iso_code }}"
+       data-product-id="{{ product.id }}"
+       data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+       data-product-title="{{ product.title | escape }}"
+       data-product-type="{{ product.type | escape }}"
+       data-product-vendor="{{ product.vendor | escape }}"
+       data-product-tags="{{ product.tags | join: ',' | escape }}"
+       data-inventory-quantity="{{ product.selected_or_first_available_variant.inventory_quantity }}"
+       data-app-url="https://ebony-those-validity-grain.trycloudflare.com"
+  >
+  </div>
+{% endif %}
 
 {% schema %}
 {
-  "name": "DELIVERBY - Core",
+  "name": "DeliverBy - Core",
   "target": "section",
   "javascript": "embed.js",
+  "templates": ["product"],
   "settings": [
     {
-      "type":"checkbox",
-      "id":"enable",
-      "label" : "Enable Deliverby Core",
-      "default" : true
+      "type": "checkbox",
+      "id": "enable",
+      "label": "Enable DeliverBy widget",
+      "default": true
     }
   ]
 }
