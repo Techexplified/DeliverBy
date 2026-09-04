@@ -14,6 +14,7 @@ import "../styles/widget-design.css";
 export async function loader({ request }) {
     const { admin, session } = await authenticate.admin(request);
     const shopName = session.shop;
+    const url = new URL(request.url);
 
     const [settingsData, productResponse] = await Promise.all([
         db.shop.findUnique({
@@ -47,7 +48,7 @@ export async function loader({ request }) {
     ]);
 
     if (!settingsData || !settingsData?.isOnboarded) {
-        return redirect("/app/onboarding");
+        return redirect(`/app/onboarding?${url.searchParams.toString()}`);
     }
 
     const productJson = await productResponse.json();
