@@ -65,9 +65,10 @@ export async function action({ request }) {
   const { session } = await authenticate.admin(request);
   const shopName = session.shop;
   const payload = await request.json();
-  const { intent, widgetData } = payload;
+  const widgetData = payload.widgetData || payload;
+  const intent = payload.intent || "save";
 
-  if (intent === "save") {
+  if (intent === "save" && widgetData) {
     await db.shop.update({
       where: { shop: shopName },
       data: {
@@ -85,7 +86,7 @@ export async function action({ request }) {
         widgetAccentColor: widgetData.widgetAccentColor || "#1A5D38",
       },
     });
-    return data({ success: true });
+    return data({ success: true, message: "Widget design saved" });
   }
 
   return data({ error: "Invalid payload" });
@@ -131,10 +132,13 @@ export default function WidgetCustomizationPage() {
   };
 
   const handleSave = () => {
-    fetcher.submit(widgetData, {
-      method: "POST",
-      encType: "application/json",
-    });
+    fetcher.submit(
+      { intent: "save", widgetData },
+      {
+        method: "POST",
+        encType: "application/json",
+      }
+    );
   };
 
   return (
