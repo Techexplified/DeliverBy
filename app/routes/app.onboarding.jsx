@@ -9,10 +9,16 @@ import "../styles/onboarding.css";
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   const shopDomain = session.shop;
+  const url = new URL(request.url);
   const [shopData, shopDetailsRes] = await Promise.all([
     getOnboardingData(shopDomain),
     admin.graphql(`query { shop { currencyCode } }`),
   ]);
+
+  if (shopData?.isOnboarded) {
+    return redirect(`/app/overview?${url.searchParams.toString()}`);
+  }
+
   const shopJson = await shopDetailsRes.json();
   const currencyCode = shopJson?.data?.shop?.currencyCode || "USD";
 

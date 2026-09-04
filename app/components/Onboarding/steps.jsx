@@ -630,7 +630,7 @@ export function Step5({ formData, updateField, url, isEmbedded }) {
       <div className="ob-divider" />
 
       {/* Where it sits on the page */}
-      <div className="ob-field">
+      {/* <div className="ob-field">
         <label className="ob-label" style={{ marginBottom: "10px" }}>
           Where it sits on the page
         </label>
@@ -649,6 +649,16 @@ export function Step5({ formData, updateField, url, isEmbedded }) {
         <p className="ob-help" style={{ marginTop: "10px" }}>
           Below the button is where most shoppers look for it, right at the moment they hesitate.
         </p>
+      </div> */}
+
+      {/* Placement Tip */}
+      <div className="ob-hint-box" style={{ marginTop: "16px" }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 110 2 1 1 0 010-2zm1 8H7V7h2v5z" />
+        </svg>
+        <div>
+          <b>Placement tip:</b> In the Shopify theme editor, you can drag the DeliverBy block anywhere on your product page. We recommend placing it <b>right below the Add to cart button</b> — that's where most shoppers look when deciding to buy.
+        </div>
       </div>
 
       {/* Warning Banner (Shown when block is not added yet) */}

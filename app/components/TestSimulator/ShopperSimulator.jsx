@@ -34,7 +34,7 @@ export default function ShopperSimulator({
         {/* Product Select */}
         <div className="sim-field">
           <label className="sim-label" htmlFor="sim-product">
-            Product
+            Product <span style={{ fontWeight: 400, color: "#616161", fontSize: "11.5px" }}>(Mock Data)</span>
           </label>
           <select
             id="sim-product"
