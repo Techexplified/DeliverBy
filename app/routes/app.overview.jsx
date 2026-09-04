@@ -236,7 +236,7 @@ export default function OverviewPage() {
                 </div>
 
                 <div>
-                    <Link to="/app" className="btn">
+                    <Link to="/app/test" className="btn">
                         Run a test
                     </Link>
                 </div>

@@ -138,23 +138,29 @@ export function calculate({
     return { mode: "error", reason: "No working days configured" };
   }
 
-  // 2. Product rules take priority (first match wins)
+  // 2. Product rules take priority (first match wins or product mock behaviour)
   const matchedRule = findMatchingRule(product, rules);
-  if (matchedRule) {
-    if (matchedRule.behaviour === "hide") {
-      return { mode: "hide", matchedRule };
-    }
-    if (matchedRule.behaviour === "merchant") {
-      return {
-        mode: "merchant",
-        merchantDate: product.merchantDate || null,
-        matchedRule,
-      };
-    }
-    if (matchedRule.behaviour === "estimate") {
-      procMin = matchedRule.procMin;
-      procMax = matchedRule.procMax;
-    }
+  const effectiveBehaviour = matchedRule?.behaviour || product?.behaviour;
+
+  if (effectiveBehaviour === "hide") {
+    return {
+      mode: "hide",
+      matchedRule: matchedRule || { matchValue: product?.title || "Digital product", behaviour: "hide" },
+    };
+  }
+  if (effectiveBehaviour === "merchant") {
+    return {
+      mode: "merchant",
+      merchantDate: product?.merchantDate || null,
+      matchedRule: matchedRule || { matchValue: product?.title || "Pre-order", behaviour: "merchant" },
+    };
+  }
+  if (matchedRule?.behaviour === "estimate") {
+    procMin = matchedRule.procMin;
+    procMax = matchedRule.procMax;
+  } else if (product?.procMin !== undefined && product?.procMax !== undefined) {
+    procMin = product.procMin;
+    procMax = product.procMax;
   } else if (shopSettings?.oosEnabled && product?.stock <= 0) {
     // Out of stock extra allowance (only if no rule took over)
     const oosExtra = shopSettings.oosDays || 0;
