@@ -37,16 +37,23 @@ export async function getOnboardingData(shopDomain) {
   return shopRecord;
 }
 
+export async function completeOnboarding(shopDomain) {
+  return await prisma.shop.update({
+    where: { shop: shopDomain },
+    data: { isOnboarded: true },
+  });
+}
+
 export async function saveOnboardingData(shopDomain, payload) {
-  const { shopSettings, closures = [], zones = [], rules = [] } = payload;
+  const { shopSettings, closures = [], zones = [], rules = [], isOnboarded } = payload;
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Update Shop fields and set isOnboarded: true
+    // 1. Update Shop fields
     const updatedShop = await tx.shop.update({
       where: { shop: shopDomain },
       data: {
         ...shopSettings,
-        isOnboarded: true,
+        ...(typeof isOnboarded === "boolean" ? { isOnboarded } : {}),
       },
     });
 

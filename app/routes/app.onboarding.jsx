@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import { redirect, useFetcher, useLoaderData, useNavigate } from "react-router";
-import { getOnboardingData, saveOnboardingData } from "../models/onboarding.server";
+import { getOnboardingData, saveOnboardingData, completeOnboarding } from "../models/onboarding.server";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "../components/Onboarding/steps";
 import { LivePreview } from "../components/Onboarding/LivePreview";
 import "../styles/onboarding.css";
@@ -28,14 +28,21 @@ export const loader = async ({ request }) => {
 export const action = async ({ request }) => {
   const { session } = await authenticate.admin(request);
   const shopDomain = session.shop;
+  const url = new URL(request.url);
   const payload = await request.json();
 
-  if (payload?.intent === "save" || payload?.intent === "skip") {
-    await saveOnboardingData(shopDomain, payload);
-    if (payload.intent === "skip") {
-      return redirect("/app");
-    }
+  if (payload?.intent === "save") {
+    await saveOnboardingData(shopDomain, { ...payload, isOnboarded: false });
     return { success: true };
+  }
+
+  if (payload?.intent === "finish" || payload?.intent === "skip") {
+    if (payload.intent === "finish") {
+      await completeOnboarding(shopDomain);
+    } else if (payload.intent === "skip") {
+      await saveOnboardingData(shopDomain, { ...payload, isOnboarded: true });
+    }
+    return redirect(`/app/overview?${url.searchParams.toString()}`);
   }
 
   return null;
@@ -156,6 +163,13 @@ export default function Onboarding() {
     });
   };
 
+  const handleFinish = () => {
+    fetcher.submit(
+      { intent: "finish" },
+      { method: "POST", encType: "application/json" }
+    );
+  };
+
   const handleSkip = () => {
     fetcher.submit(
       { intent: "skip", shopSettings: {}, closures: [], zones: [], rules: [] },
@@ -237,7 +251,7 @@ export default function Onboarding() {
                 formData={formData}
                 isEmbedded={isEmbedded}
                 url={themeCustomizerUrl}
-                onFinish={() => navigate("/app/overview")}
+                onFinish={handleFinish}
               />
             )}
           </div>
