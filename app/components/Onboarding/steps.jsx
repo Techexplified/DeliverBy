@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PublicHolidays } from "../../libs/onboarding/Holidays";
+import { Link } from "react-router";
 
 export const TIMEZONES = [
   { value: "Asia/Kolkata", label: "(GMT+5:30) Kolkata" },
@@ -788,12 +789,12 @@ export function Step6({ formData, onFinish, isEmbedded, url }) {
               Preview & test has saved situations — ordering after the cut-off, on a closed day, out of stock, from a country you'd forgotten about.
             </p>
           </div>
-          <button type="button" className="btn" onClick={onFinish}>
+          <Link to="/app/test" className="btn">
             Open
-          </button>
+          </Link>
         </div>
 
-        <div className="next-card">
+        {/* <div className="next-card">
           <div className="next-card-info">
             <h4>Check the dates were true</h4>
             <p>
@@ -803,7 +804,7 @@ export function Step6({ formData, onFinish, isEmbedded, url }) {
           <button type="button" className="btn" onClick={onFinish}>
             Open
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Your settings JSON export */}

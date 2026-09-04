@@ -783,6 +783,7 @@ select.ob-input {
   gap: 6px;
   cursor: pointer;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .btn:hover {
