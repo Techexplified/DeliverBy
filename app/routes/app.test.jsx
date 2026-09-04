@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useLoaderData, Link, data } from "react-router";
 import {
   format,
@@ -13,7 +13,7 @@ import { authenticate } from "../shopify.server";
 import { calculate, isWorkDay } from "../utils/calculator";
 import { formatMoney } from "../utils/currency";
 import { COUNTRIES } from "../components/Onboarding/steps";
-import { MOCK_PRODUCTS, SAVED_SCENARIOS } from "../libs/test/scenarios";
+import { MOCK_PRODUCTS, getSavedScenarios } from "../libs/test/scenarios";
 
 import ShopperSimulator from "../components/TestSimulator/ShopperSimulator";
 import ResultCard from "../components/TestSimulator/ResultCard";
@@ -86,8 +86,19 @@ function formatShortRange(dMin, dMax) {
 export default function TestSimulatorPage() {
   const { shopData, currencyCode } = useLoaderData();
 
+  // Dynamically generated saved scenarios relative to current date and store settings
+  const savedScenarios = useMemo(
+    () =>
+      getSavedScenarios(
+        new Date(),
+        shopData?.cutoffTime || "14:00",
+        shopData?.homeCountry || "IN"
+      ),
+    [shopData?.cutoffTime, shopData?.homeCountry]
+  );
+
   // Initial preset defaults from Scenario 1
-  const initialScenario = SAVED_SCENARIOS[0];
+  const initialScenario = savedScenarios[0];
   const [selectedScenarioId, setSelectedScenarioId] = useState(initialScenario.id);
   const [selectedProductId, setSelectedProductId] = useState(initialScenario.productId);
   const [selectedCountry, setSelectedCountry] = useState(shopData.homeCountry || initialScenario.country);
@@ -135,7 +146,7 @@ export default function TestSimulatorPage() {
   const simulatedDate = new Date(yearNum, (monthNum || 1) - 1, dayNum || 1, hours, mins, 0);
 
   // 5. Active Product and Mock Overrides
-  const activeScenario = SAVED_SCENARIOS.find((s) => s.id === selectedScenarioId);
+  const activeScenario = savedScenarios.find((s) => s.id === selectedScenarioId);
   const rawProduct =
     MOCK_PRODUCTS.find((p) => p.id === selectedProductId) || MOCK_PRODUCTS[0];
 
@@ -409,12 +420,16 @@ export default function TestSimulatorPage() {
 
           {/* 2. Saved Scenarios List */}
           <SavedScenariosCard
+            scenarios={savedScenarios}
             selectedScenarioId={selectedScenarioId}
             onSelectScenario={handleSelectScenario}
           />
 
           {/* 3. Active Scenario Detail Card */}
-          <ActiveScenarioDetailCard selectedScenarioId={selectedScenarioId} />
+          <ActiveScenarioDetailCard
+            scenarios={savedScenarios}
+            selectedScenarioId={selectedScenarioId}
+          />
 
           {/* 4. Adjustments Applied Card */}
           <AdjustmentsCard adjustments={adjustments} />

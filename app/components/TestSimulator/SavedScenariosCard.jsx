@@ -2,6 +2,7 @@ import React from "react";
 import { SAVED_SCENARIOS } from "../../libs/test/scenarios";
 
 export default function SavedScenariosCard({
+  scenarios = SAVED_SCENARIOS,
   selectedScenarioId,
   onSelectScenario,
 }) {
@@ -15,7 +16,7 @@ export default function SavedScenariosCard({
       </div>
 
       <div className="sim-scenarios-list">
-        {SAVED_SCENARIOS.map((scenario) => {
+        {scenarios.map((scenario) => {
           const isSelected = scenario.id === selectedScenarioId;
           return (
             <button

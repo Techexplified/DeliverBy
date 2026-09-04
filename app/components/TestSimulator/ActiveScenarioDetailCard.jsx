@@ -1,10 +1,12 @@
 import React from "react";
 import { SAVED_SCENARIOS } from "../../libs/test/scenarios";
 
-export default function ActiveScenarioDetailCard({ selectedScenarioId }) {
+export default function ActiveScenarioDetailCard({
+  scenarios = SAVED_SCENARIOS,
+  selectedScenarioId,
+}) {
   const activeScenario =
-    SAVED_SCENARIOS.find((s) => s.id === selectedScenarioId) ||
-    SAVED_SCENARIOS[0];
+    scenarios.find((s) => s.id === selectedScenarioId) || scenarios[0];
 
   if (!activeScenario) return null;
 
