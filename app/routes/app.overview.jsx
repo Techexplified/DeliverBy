@@ -5,9 +5,11 @@ import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import { calculate, isWorkDay } from "../utils/calculator";
 import { COUNTRIES } from "../components/Onboarding/steps";
+import { formatDeliveryLine, formatDateValue } from "../utils/formatter.js";
+import { formatMoney } from "../utils/currency.js";
 import "../styles/onboarding.css";
 import "../styles/overview.css";
-import { formatMoney } from "../utils/currency.js";
+import "../styles/widget-design.css";
 
 export async function loader({ request }) {
     const { admin, session } = await authenticate.admin(request);
@@ -27,7 +29,7 @@ export async function loader({ request }) {
         shop {
           currencyCode
         }
-        products(first: 10) {
+        products(first: 50) {
           nodes {
             id
             title
@@ -167,7 +169,112 @@ export default function OverviewPage() {
         ? formatShortRange(calculation.arriveMin, calculation.arriveMax)
         : "";
 
-    // 5. Build Day-by-Day Timeline Strip
+    // 5. Widget Customization Settings & Formatting
+    const containerStyle = settingsData.widgetContainer || "none";
+    const alignment = settingsData.widgetAlignment || "left";
+    const iconChoice = settingsData.widgetIcon || "van";
+    const accentColor = settingsData.widgetAccentColor || "#1A5D38";
+    const showIcon = settingsData.showDeliveryIcon !== false;
+    const showCutoff = settingsData.showCutoffCountdown !== false;
+    const showBreakdown = settingsData.showBreakdown !== false;
+
+    let formattedDate = "";
+    if (calculation.mode === "merchant") {
+        formattedDate = calculation.merchantDate || "your specified date";
+    } else if (calculation.mode === "ok") {
+        formattedDate = formatDateValue({
+            arriveMin: calculation.arriveMin,
+            arriveMax: calculation.arriveMax,
+            dateFormat: settingsData.dateFormat || "range",
+            dateStyle: settingsData.dateStyle || "full",
+            currentDate: now,
+        });
+    }
+
+    const mainLineText = formatDeliveryLine({
+        template: settingsData.mainLine || "Get it {date}",
+        arriveMin: calculation.arriveMin,
+        arriveMax: calculation.arriveMax,
+        dateFormat: settingsData.dateFormat || "range",
+        dateStyle: settingsData.dateStyle || "full",
+        zoneName: matchedZone?.name || "India domestic",
+        currentDate: now,
+    });
+
+    const supportingLineText = formatDeliveryLine({
+        template:
+            settingsData.supportingLine ||
+            `Dispatched from ${
+                settingsData.timezone?.split("/")[1]?.replace("_", " ") || "Kolkata"
+            }`,
+        arriveMin: calculation.arriveMin,
+        arriveMax: calculation.arriveMax,
+        dateFormat: settingsData.dateFormat || "range",
+        dateStyle: settingsData.dateStyle || "full",
+        zoneName: matchedZone?.name || "India domestic",
+        currentDate: now,
+    });
+
+    const transitText = `${matchedZone?.transitMin ?? 2}–${
+        matchedZone?.transitMax ?? 4
+    } days to ${matchedZone?.name || "India domestic"}`;
+
+    // Cut-off Countdown Calculation
+    const cutoffStr = settingsData.cutoffTime || "14:00";
+    const [cutHours = 14, cutMinutes = 0] = cutoffStr.split(":").map(Number);
+    const cutoffDate = new Date(now);
+    cutoffDate.setHours(cutHours, cutMinutes, 0, 0);
+
+    const diffMs = cutoffDate.getTime() - now.getTime();
+    const remainingHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const remainingMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    let countdownText = "Today's cut-off has passed";
+    let isCountdownActive = false;
+
+    if (!calculation.closedToday && !calculation.pastCutoff && diffMs > 0) {
+        isCountdownActive = true;
+        if (remainingHours > 0) {
+            countdownText = `Order within ${remainingHours}h ${remainingMins}m for today's dispatch`;
+        } else {
+            countdownText = `Order within ${remainingMins}m for today's dispatch`;
+        }
+    } else if (calculation.closedToday) {
+        countdownText = "Closed today — we're back next open day";
+    }
+
+    const renderIcon = () => {
+        if (!showIcon) return null;
+        if (iconChoice === "box") {
+            return (
+                <svg className="deliverby-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            );
+        }
+        if (iconChoice === "calendar") {
+            return (
+                <svg className="deliverby-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+            );
+        }
+        return (
+            <svg className="deliverby-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="3" width="15" height="13" />
+                <polygon points="16 8 20 8 23 11 23 16 16 16 8" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+        );
+    };
+
+    // 6. Build Day-by-Day Timeline Strip
     const timelineDays = [];
     if (calculation.mode === "ok") {
         const totalDays = Math.min(35, differenceInCalendarDays(calculation.arriveMax, now) + 2);
@@ -410,62 +517,84 @@ export default function OverviewPage() {
                         <span className="badge-draft">Product page</span>
                     </div>
 
-                    <div className="preview-card" style={{ boxShadow: "none" }}>
-                        <div className="preview-img">
-                            {productForCalc.type === "Digital" ? "Delivered by email" : "Product image"}
-                        </div>
-                        <h4 className="preview-title">{productForCalc.title}</h4>
-                        <div className="preview-price">{productForCalc.price}</div>
-                        <div className="preview-atc">Add to cart</div>
+                    <div className="storefront-mockup" style={{ marginBottom: 0 }}>
+                        <div className="product-mockup-title">{productForCalc.title}</div>
+                        <div className="product-mockup-price">{productForCalc.price}</div>
+                        <button type="button" className="product-mockup-atc" disabled>
+                            Add to cart
+                        </button>
 
-                        <div className="edd-storefront-widget">
-                            <div className="edd-top-row">
-                                <span className="edd-icon">
-                                    <svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="#0C5132" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="1.6" y="4.8" width="9.4" height="7.6" rx="1.2" />
-                                        <path d="M11 7.4h2.6l2.6 2.7v2.3H11z" />
-                                        <circle cx="4.9" cy="13.4" r="1.6" fill="#fff" stroke="#0C5132" />
-                                        <circle cx="12.8" cy="13.4" r="1.6" fill="#fff" stroke="#0C5132" />
-                                    </svg>
-                                </span>
-                                <div className="edd-content">
-                                    <div className="edd-main-line">
-                                        Get it <b>{arrivalMainText}</b>
-                                    </div>
-                                    <div className="edd-sub-line">
-                                        Dispatched from {settingsData.timezone?.split("/")[1]?.replace("_", " ") || "Kolkata"}
-                                    </div>
-
-                                    {calculation.mode === "ok" && (
-                                        <div className="edd-pill-timer">
-                                            {calculation.closedToday
-                                                ? "Closed today"
-                                                : calculation.pastCutoff
-                                                    ? "Today's cut-off has passed"
-                                                    : "Order within today's cut-off"}
-                                        </div>
-                                    )}
-                                </div>
+                        {/* DeliverBy Live Injected Widget */}
+                        {calculation.mode === "hide" ? (
+                            <div
+                                style={{
+                                    padding: "10px 12px",
+                                    background: "#FFF5F5",
+                                    border: "1px dashed #FFA8A8",
+                                    borderRadius: "6px",
+                                    fontSize: "11.5px",
+                                    color: "#C5280C",
+                                    textAlign: "center",
+                                }}
+                            >
+                                No delivery block shown (Hidden by Product Rule:{" "}
+                                <strong>{calculation.matchedRule?.matchValue || "Digital/Gift Card"}</strong>)
                             </div>
-
-                            {calculation.mode === "ok" && (
-                                <>
-                                    <div className="edd-breakdown-divider" />
-                                    <div className="edd-breakdown">
-                                        <div className="edd-breakdown-row">
-                                            <span className="edd-breakdown-label">Leaves us</span>
-                                            <span className="edd-breakdown-val">{shipShort}</span>
+                        ) : (
+                            <div
+                                className={`deliverby-widget-box container-${containerStyle} align-${alignment}`}
+                            >
+                                <div className="deliverby-main-row">
+                                    {showIcon && renderIcon()}
+                                    <div>
+                                        <div className="deliverby-main-title">
+                                            {mainLineText.includes(formattedDate) ? (
+                                                <>
+                                                    {mainLineText.replace(formattedDate, "")}
+                                                    <strong>{formattedDate}</strong>
+                                                </>
+                                            ) : (
+                                                mainLineText
+                                            )}
                                         </div>
-                                        <div className="edd-breakdown-row">
-                                            <span className="edd-breakdown-label">In transit</span>
-                                            <span className="edd-breakdown-val">
-                                                {matchedZone.transitMin ?? 2}–{matchedZone.transitMax ?? 4} days to {matchedZone.name || "domestic"}
+                                        {supportingLineText && (
+                                            <div className="deliverby-supporting-text">
+                                                {supportingLineText}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Cut-off Countdown pill */}
+                                {showCutoff && (
+                                    <div
+                                        className={`deliverby-cutoff-pill ${
+                                            isCountdownActive ? "active" : "passed"
+                                        }`}
+                                    >
+                                        {countdownText}
+                                    </div>
+                                )}
+
+                                {/* Dispatch & Transit Breakdown */}
+                                {showBreakdown && calculation.mode === "ok" && (
+                                    <div className="deliverby-breakdown-table">
+                                        <div className="deliverby-breakdown-row">
+                                            <span>Leaves us</span>
+                                            <span className="deliverby-breakdown-val">
+                                                {shipShort}
+                                            </span>
+                                        </div>
+                                        <div className="deliverby-breakdown-row">
+                                            <span>In transit</span>
+                                            <span className="deliverby-breakdown-val">
+                                                {transitText}
                                             </span>
                                         </div>
                                     </div>
-                                </>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
