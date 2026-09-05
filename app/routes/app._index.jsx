@@ -1,6 +1,9 @@
-import { redirect } from "react-router";
+import { embedRedirect } from "../utils/shopify-embed-nav.server.js";
 
-export function loader({ request }) {
-    const url = new URL(request.url);
-    return redirect(`/app/overview?${url.searchParams.toString()}`);
+export const loader = async ({ request }) => {
+  return embedRedirect("/app/overview", request);
+};
+
+export default function AppIndexRedirect() {
+  return null;
 }

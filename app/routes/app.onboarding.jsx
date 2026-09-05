@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import { redirect, useFetcher, useLoaderData, useNavigate } from "react-router";
+import { embedRedirect } from "../utils/shopify-embed-nav.server.js";
 import { getOnboardingData, saveOnboardingData, completeOnboarding } from "../models/onboarding.server";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "../components/Onboarding/steps";
 import { LivePreview } from "../components/Onboarding/LivePreview";
@@ -16,7 +17,7 @@ export const loader = async ({ request }) => {
   ]);
 
   if (shopData?.isOnboarded) {
-    return redirect(`/app/overview?${url.searchParams.toString()}`);
+    return embedRedirect("/app/overview", request);
   }
 
   const shopJson = await shopDetailsRes.json();
@@ -42,7 +43,7 @@ export const action = async ({ request }) => {
     } else if (payload.intent === "skip") {
       await saveOnboardingData(shopDomain, { ...payload, isOnboarded: true });
     }
-    return redirect(`/app/overview?${url.searchParams.toString()}`);
+    return embedRedirect("/app/overview", request);
   }
 
   return null;

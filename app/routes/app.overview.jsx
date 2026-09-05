@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { redirect, data, useFetcher, useLoaderData, Link } from "react-router";
+import { embedRedirect } from "../utils/shopify-embed-nav.server.js";
 import { format, addDays, isSameDay, differenceInCalendarDays, startOfDay, endOfDay } from "date-fns";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
@@ -51,7 +52,7 @@ export async function loader({ request }) {
     ]);
 
     if (!settingsData || !settingsData?.isOnboarded) {
-        return redirect(`/app/onboarding?${url.searchParams.toString()}`);
+        return embedRedirect("/app/onboarding", request);
     }
 
     const productJson = await productResponse.json();
