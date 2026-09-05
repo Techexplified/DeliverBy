@@ -76,7 +76,7 @@ export default function ZonesTable({
                     <input
                       type="number"
                       min="0"
-                      max="60"
+                      max={z.transitMax}
                       className="zones-input-num"
                       value={z.transitMin}
                       onChange={(e) =>
@@ -90,7 +90,7 @@ export default function ZonesTable({
                     <span style={{ color: "#8A8A8A" }}>–</span>
                     <input
                       type="number"
-                      min="0"
+                      min={z.transitMin}
                       max="60"
                       className="zones-input-num"
                       value={z.transitMax}

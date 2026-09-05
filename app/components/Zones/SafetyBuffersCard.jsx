@@ -83,6 +83,7 @@ export default function SafetyBuffersCard({
                 <input
                   type="date"
                   className="zones-input-text"
+                  max={peakSeasonEnd}
                   value={peakSeasonStart || ""}
                   onChange={(e) => onUpdateField("peakSeasonStart", e.target.value)}
                 />
@@ -95,6 +96,7 @@ export default function SafetyBuffersCard({
                 <input
                   type="date"
                   className="zones-input-text"
+                  min={peakSeasonStart}
                   value={peakSeasonEnd || ""}
                   onChange={(e) => onUpdateField("peakSeasonEnd", e.target.value)}
                 />
@@ -110,7 +112,7 @@ export default function SafetyBuffersCard({
                 <input
                   type="number"
                   min="0"
-                  max="30"
+                  max={peakSeasonTransitMax}
                   className="zones-input-num"
                   value={peakSeasonTransitMin}
                   onChange={(e) =>
@@ -123,7 +125,7 @@ export default function SafetyBuffersCard({
                 <span style={{ fontSize: "13px", color: "#616161" }}>to</span>
                 <input
                   type="number"
-                  min="0"
+                  min={peakSeasonTransitMin}
                   max="30"
                   className="zones-input-num"
                   value={peakSeasonTransitMax}
