@@ -65,10 +65,10 @@ export default function ProductCatchesCard({
           <table className="rules-table">
             <thead>
               <tr>
-                <th style={{ width: "30%" }}>Product</th>
-                <th style={{ width: "36%" }}>Type / tags</th>
-                <th style={{ width: "20%" }}>Matched by</th>
-                <th style={{ width: "14%" }}>Dispatch</th>
+                <th style={{ width: "28%" }}>Product</th>
+                <th style={{ width: "28%" }}>Type / tags</th>
+                <th style={{ width: "28%" }}>Matched by</th>
+                <th style={{ width: "16%" }}>Dispatch</th>
               </tr>
             </thead>
             <tbody>
