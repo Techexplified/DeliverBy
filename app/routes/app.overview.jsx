@@ -34,8 +34,11 @@ export async function loader({ request }) {
           nodes {
             id
             title
+            handle
+            vendor
             productType
             tags
+            totalInventory
             variants(first: 1) {
               nodes {
                 price
@@ -129,7 +132,8 @@ export default function OverviewPage() {
         title: selectedProductRaw.title,
         type: selectedProductRaw.productType || "",
         tags: selectedProductRaw.tags || [],
-        stock: 20,
+        vendor: selectedProductRaw.vendor,
+        stock: selectedProductRaw.totalInventory,
         price: productPrice,
     };
 
