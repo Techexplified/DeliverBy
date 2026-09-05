@@ -1,5 +1,6 @@
 // app/models/onboarding.server.js
 import prisma from "../db.server";
+import { DEFAULT_ZONES } from "../libs/settings/defaults";
 
 export async function getOnboardingData(shopDomain) {
   let shopRecord = await prisma.shop.findUnique({
@@ -17,13 +18,14 @@ export async function getOnboardingData(shopDomain) {
       data: {
         shop: shopDomain,
         zones: {
-          create: [
-            { name: "India domestic", countries: ["IN"], transitMin: 2, transitMax: 4, isHome: true, isFallback: false },
-            { name: "United States", countries: ["US"], transitMin: 6, transitMax: 9, isHome: false, isFallback: false },
-            { name: "Europe", countries: ["GB", "DE", "FR", "NL", "IE", "ES", "IT"], transitMin: 5, transitMax: 8, isHome: false, isFallback: false },
-            { name: "Australia & New Zealand", countries: ["AU", "NZ"], transitMin: 8, transitMax: 12, isHome: false, isFallback: false },
-            { name: "Rest of world", countries: [], transitMin: 12, transitMax: 24, isHome: false, isFallback: true },
-          ],
+          create: DEFAULT_ZONES.map((z) => ({
+            name: z.name,
+            countries: z.countries,
+            transitMin: z.transitMin,
+            transitMax: z.transitMax,
+            isHome: z.isHome,
+            isFallback: z.isFallback,
+          })),
         },
       },
       include: {

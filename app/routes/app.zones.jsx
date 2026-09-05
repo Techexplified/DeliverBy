@@ -33,13 +33,7 @@ export const COUNTRIES = [
   { code: "OT", name: "Other" },
 ];
 
-export const DEFAULT_ZONES = [
-  { name: "India domestic", countries: ["IN"], transitMin: 2, transitMax: 4, isHome: true, isFallback: false },
-  { name: "United States", countries: ["US"], transitMin: 6, transitMax: 9, isHome: false, isFallback: false },
-  { name: "Europe", countries: ["GB", "DE", "FR", "NL", "IE", "ES", "IT"], transitMin: 5, transitMax: 8, isHome: false, isFallback: false },
-  { name: "Australia & New Zealand", countries: ["AU", "NZ"], transitMin: 8, transitMax: 12, isHome: false, isFallback: false },
-  { name: "Rest of world", countries: [], transitMin: 12, transitMax: 24, isHome: false, isFallback: true },
-];
+export { DEFAULT_ZONES } from "../libs/settings/defaults";
 
 export async function loader({ request }) {
   const { session } = await authenticate.admin(request);

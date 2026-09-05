@@ -4,6 +4,11 @@ import db from "../db.server";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import { COUNTRIES } from "./app.zones";
+import {
+  DEFAULT_SHOP_SETTINGS,
+  DEFAULT_ZONES,
+  DEFAULT_RULES,
+} from "../libs/settings/defaults";
 import "../styles/settings.css";
 
 export async function loader({ request }) {
@@ -104,68 +109,45 @@ export async function action({ request }) {
     if (!shop) return data({ error: "Shop not found" });
 
     // Clean relations and reset shop to initial factory defaults
-    await db.$transaction([
-      db.closure.deleteMany({ where: { shopId: shop.id } }),
-      db.productRule.deleteMany({ where: { shopId: shop.id } }),
-      db.deliveryZone.deleteMany({ where: { shopId: shop.id } }),
-      db.shop.update({
+    await db.$transaction(async (tx) => {
+      await tx.closure.deleteMany({ where: { shopId: shop.id } });
+      await tx.productRule.deleteMany({ where: { shopId: shop.id } });
+      await tx.deliveryZone.deleteMany({ where: { shopId: shop.id } });
+
+      await tx.shop.update({
         where: { id: shop.id },
         data: {
-          cutoffTime: "14:00",
-          procMin: 1,
-          procMax: 2,
-          oosEnabled: true,
-          oosDays: 10,
-          workingDays: [1, 2, 3, 4, 5, 6],
-          carrierSat: false,
-          carrierSun: false,
-          homeCountry: "IN",
-          customsClearanceEnabled: false,
-          customsClearanceDays: 2,
-          peakSeasonoEnabled: false,
-          peakSeasonStart: null,
-          peakSeasonEnd: null,
-          peakSeasonTransitMin: 1,
-          peakSeasonTransitMax: 3,
-          dateFormat: "range",
-          dateStyle: "full",
-          mainLine: "Get it {date}",
-          supportingLine: "Dispatched from Kolkata",
-          fallbackText: "Enter your postcode for a delivery date",
-          showCutoffCountdown: true,
-          showBreakdown: true,
-          showDeliveryIcon: true,
-          widgetContainer: "none",
-          widgetAlignment: "left",
-          widgetIcon: "van",
-          widgetAccentColor: "#1A5D38",
-          detectionMethod: "ip",
-          locationFallback: "ask",
+          ...DEFAULT_SHOP_SETTINGS,
+          isOnboarded: true,
         },
-      }),
-      db.deliveryZone.createMany({
-        data: [
-          {
-            shopId: shop.id,
-            name: "India domestic",
-            countries: ["IN"],
-            transitMin: 2,
-            transitMax: 4,
-            isHome: true,
-            isFallback: false,
-          },
-          {
-            shopId: shop.id,
-            name: "Rest of world",
-            countries: [],
-            transitMin: 7,
-            transitMax: 14,
-            isHome: false,
-            isFallback: true,
-          },
-        ],
-      }),
-    ]);
+      });
+
+      await tx.deliveryZone.createMany({
+        data: DEFAULT_ZONES.map((z) => ({
+          shopId: shop.id,
+          name: z.name,
+          countries: z.countries || [],
+          transitMin: z.transitMin,
+          transitMax: z.transitMax,
+          isHome: Boolean(z.isHome),
+          isFallback: Boolean(z.isFallback),
+        })),
+      });
+
+      await tx.productRule.createMany({
+        data: DEFAULT_RULES.map((r) => ({
+          shopId: shop.id,
+          priorityOrder: r.priorityOrder,
+          matchField: r.matchField,
+          matchOperator: r.matchOperator,
+          matchValue: r.matchValue,
+          behaviour: r.behaviour,
+          procMin: r.procMin,
+          procMax: r.procMax,
+          isEnabled: r.isEnabled,
+        })),
+      });
+    });
 
     return data({ success: true, message: "Settings reset to defaults" });
   }
@@ -189,36 +171,39 @@ export async function action({ request }) {
         await tx.shop.update({
           where: { id: shop.id },
           data: {
-            cutoffTime: parsed.cutoffTime || "14:00",
-            procMin: parsed.procMin ?? 1,
-            procMax: parsed.procMax ?? 2,
-            oosEnabled: parsed.oosEnabled ?? true,
-            oosDays: parsed.oosDays ?? 10,
-            workingDays: parsed.workingDays || [1, 2, 3, 4, 5, 6],
+            timezone: parsed.timezone || DEFAULT_SHOP_SETTINGS.timezone,
+            cutoffTime: parsed.cutoffTime || DEFAULT_SHOP_SETTINGS.cutoffTime,
+            procMin: parsed.procMin ?? DEFAULT_SHOP_SETTINGS.procMin,
+            procMax: parsed.procMax ?? DEFAULT_SHOP_SETTINGS.procMax,
+            oosEnabled: parsed.oosEnabled ?? DEFAULT_SHOP_SETTINGS.oosEnabled,
+            oosDays: parsed.oosDays ?? DEFAULT_SHOP_SETTINGS.oosDays,
+            workingDays: parsed.workingDays || DEFAULT_SHOP_SETTINGS.workingDays,
             carrierSat: Boolean(parsed.carrierSat),
             carrierSun: Boolean(parsed.carrierSun),
-            homeCountry: parsed.homeCountry || "IN",
+            homeCountry: parsed.homeCountry || DEFAULT_SHOP_SETTINGS.homeCountry,
             customsClearanceEnabled: Boolean(parsed.customsClearanceEnabled),
-            customsClearanceDays: parsed.customsClearanceDays ?? 2,
+            customsClearanceDays: parsed.customsClearanceDays ?? DEFAULT_SHOP_SETTINGS.customsClearanceDays,
             peakSeasonoEnabled: Boolean(parsed.peakSeasonoEnabled),
             peakSeasonStart: parsed.peakSeasonStart || null,
             peakSeasonEnd: parsed.peakSeasonEnd || null,
-            peakSeasonTransitMin: parsed.peakSeasonTransitMin ?? 1,
-            peakSeasonTransitMax: parsed.peakSeasonTransitMax ?? 3,
-            dateFormat: parsed.dateFormat || "range",
-            dateStyle: parsed.dateStyle || "full",
-            mainLine: parsed.mainLine || "Get it {date}",
-            supportingLine: parsed.supportingLine || "Dispatched from Kolkata",
-            fallbackText: parsed.fallbackText || "Enter your postcode for a delivery date",
+            peakSeasonTransitMin: parsed.peakSeasonTransitMin ?? DEFAULT_SHOP_SETTINGS.peakSeasonTransitMin,
+            peakSeasonTransitMax: parsed.peakSeasonTransitMax ?? DEFAULT_SHOP_SETTINGS.peakSeasonTransitMax,
+            dateFormat: parsed.dateFormat || DEFAULT_SHOP_SETTINGS.dateFormat,
+            dateStyle: parsed.dateStyle || DEFAULT_SHOP_SETTINGS.dateStyle,
+            mainLine: parsed.mainLine || DEFAULT_SHOP_SETTINGS.mainLine,
+            supportingLine: parsed.supportingLine || DEFAULT_SHOP_SETTINGS.supportingLine,
+            fallbackText: parsed.fallbackText || DEFAULT_SHOP_SETTINGS.fallbackText,
             showCutoffCountdown: parsed.showCutoffCountdown !== false,
             showBreakdown: parsed.showBreakdown !== false,
             showDeliveryIcon: parsed.showDeliveryIcon !== false,
-            widgetContainer: parsed.widgetContainer || "none",
-            widgetAlignment: parsed.widgetAlignment || "left",
-            widgetIcon: parsed.widgetIcon || "van",
-            widgetAccentColor: parsed.widgetAccentColor || "#1A5D38",
-            detectionMethod: parsed.detectionMethod || "ip",
-            locationFallback: parsed.locationFallback || "ask",
+            hideWhenNoRule: Boolean(parsed.hideWhenNoRule),
+            widgetContainer: parsed.widgetContainer || DEFAULT_SHOP_SETTINGS.widgetContainer,
+            widgetAlignment: parsed.widgetAlignment || DEFAULT_SHOP_SETTINGS.widgetAlignment,
+            widgetIcon: parsed.widgetIcon || DEFAULT_SHOP_SETTINGS.widgetIcon,
+            widgetAccentColor: parsed.widgetAccentColor || DEFAULT_SHOP_SETTINGS.widgetAccentColor,
+            widgetPosition: parsed.widgetPosition || DEFAULT_SHOP_SETTINGS.widgetPosition,
+            detectionMethod: parsed.detectionMethod || DEFAULT_SHOP_SETTINGS.detectionMethod,
+            locationFallback: parsed.locationFallback || DEFAULT_SHOP_SETTINGS.locationFallback,
           },
         });
 
@@ -326,39 +311,61 @@ export default function Settings() {
   const handleCopyConfig = () => {
     if (!shopData) return;
     const exportData = {
-      cutoffTime: shopData.cutoffTime,
-      procMin: shopData.procMin,
-      procMax: shopData.procMax,
-      oosEnabled: shopData.oosEnabled,
-      oosDays: shopData.oosDays,
-      workingDays: shopData.workingDays,
-      carrierSat: shopData.carrierSat,
-      carrierSun: shopData.carrierSun,
-      homeCountry: shopData.homeCountry,
-      customsClearanceEnabled: shopData.customsClearanceEnabled,
-      customsClearanceDays: shopData.customsClearanceDays,
-      peakSeasonoEnabled: shopData.peakSeasonoEnabled,
-      peakSeasonStart: shopData.peakSeasonStart,
-      peakSeasonEnd: shopData.peakSeasonEnd,
-      peakSeasonTransitMin: shopData.peakSeasonTransitMin,
-      peakSeasonTransitMax: shopData.peakSeasonTransitMax,
-      dateFormat: shopData.dateFormat,
-      dateStyle: shopData.dateStyle,
-      mainLine: shopData.mainLine,
-      supportingLine: shopData.supportingLine,
-      fallbackText: shopData.fallbackText,
-      showCutoffCountdown: shopData.showCutoffCountdown,
-      showBreakdown: shopData.showBreakdown,
-      showDeliveryIcon: shopData.showDeliveryIcon,
-      widgetContainer: shopData.widgetContainer,
-      widgetAlignment: shopData.widgetAlignment,
-      widgetIcon: shopData.widgetIcon,
-      widgetAccentColor: shopData.widgetAccentColor,
-      detectionMethod: shopData.detectionMethod,
-      locationFallback: shopData.locationFallback,
-      closures: shopData.closures,
-      zones: shopData.zones,
-      rules: shopData.rules,
+      timezone: shopData.timezone || DEFAULT_SHOP_SETTINGS.timezone,
+      cutoffTime: shopData.cutoffTime || DEFAULT_SHOP_SETTINGS.cutoffTime,
+      procMin: shopData.procMin ?? DEFAULT_SHOP_SETTINGS.procMin,
+      procMax: shopData.procMax ?? DEFAULT_SHOP_SETTINGS.procMax,
+      oosEnabled: shopData.oosEnabled ?? DEFAULT_SHOP_SETTINGS.oosEnabled,
+      oosDays: shopData.oosDays ?? DEFAULT_SHOP_SETTINGS.oosDays,
+      workingDays: shopData.workingDays || DEFAULT_SHOP_SETTINGS.workingDays,
+      carrierSat: Boolean(shopData.carrierSat),
+      carrierSun: Boolean(shopData.carrierSun),
+      homeCountry: shopData.homeCountry || DEFAULT_SHOP_SETTINGS.homeCountry,
+      customsClearanceEnabled: Boolean(shopData.customsClearanceEnabled),
+      customsClearanceDays: shopData.customsClearanceDays ?? DEFAULT_SHOP_SETTINGS.customsClearanceDays,
+      peakSeasonoEnabled: Boolean(shopData.peakSeasonoEnabled),
+      peakSeasonStart: shopData.peakSeasonStart || null,
+      peakSeasonEnd: shopData.peakSeasonEnd || null,
+      peakSeasonTransitMin: shopData.peakSeasonTransitMin ?? DEFAULT_SHOP_SETTINGS.peakSeasonTransitMin,
+      peakSeasonTransitMax: shopData.peakSeasonTransitMax ?? DEFAULT_SHOP_SETTINGS.peakSeasonTransitMax,
+      dateFormat: shopData.dateFormat || DEFAULT_SHOP_SETTINGS.dateFormat,
+      dateStyle: shopData.dateStyle || DEFAULT_SHOP_SETTINGS.dateStyle,
+      mainLine: shopData.mainLine || DEFAULT_SHOP_SETTINGS.mainLine,
+      supportingLine: shopData.supportingLine || DEFAULT_SHOP_SETTINGS.supportingLine,
+      fallbackText: shopData.fallbackText || DEFAULT_SHOP_SETTINGS.fallbackText,
+      showCutoffCountdown: shopData.showCutoffCountdown !== false,
+      showBreakdown: shopData.showBreakdown !== false,
+      showDeliveryIcon: shopData.showDeliveryIcon !== false,
+      hideWhenNoRule: Boolean(shopData.hideWhenNoRule),
+      widgetContainer: shopData.widgetContainer || DEFAULT_SHOP_SETTINGS.widgetContainer,
+      widgetAlignment: shopData.widgetAlignment || DEFAULT_SHOP_SETTINGS.widgetAlignment,
+      widgetIcon: shopData.widgetIcon || DEFAULT_SHOP_SETTINGS.widgetIcon,
+      widgetAccentColor: shopData.widgetAccentColor || DEFAULT_SHOP_SETTINGS.widgetAccentColor,
+      widgetPosition: shopData.widgetPosition || DEFAULT_SHOP_SETTINGS.widgetPosition,
+      detectionMethod: shopData.detectionMethod || DEFAULT_SHOP_SETTINGS.detectionMethod,
+      locationFallback: shopData.locationFallback || DEFAULT_SHOP_SETTINGS.locationFallback,
+      closures: (shopData.closures || []).map((c) => ({
+        date: c.date,
+        reason: c.reason || "",
+      })),
+      zones: (shopData.zones || []).map((z) => ({
+        name: z.name,
+        countries: z.countries || [],
+        transitMin: z.transitMin,
+        transitMax: z.transitMax,
+        isHome: Boolean(z.isHome),
+        isFallback: Boolean(z.isFallback),
+      })),
+      rules: (shopData.rules || []).map((r, idx) => ({
+        priorityOrder: r.priorityOrder ?? idx,
+        matchField: r.matchField,
+        matchOperator: r.matchOperator,
+        matchValue: r.matchValue,
+        behaviour: r.behaviour,
+        procMin: r.procMin || 0,
+        procMax: r.procMax || 0,
+        isEnabled: r.isEnabled !== false,
+      })),
     };
 
     navigator.clipboard.writeText(JSON.stringify(exportData, null, 2));
